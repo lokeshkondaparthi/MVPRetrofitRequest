@@ -6,16 +6,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.pyarinc.mvpretrofitrequest.interfaces.ResponseListener;
+import com.pyarinc.mvpretrofitrequest.interfaces.ResponseObjectListener;
 import com.pyarinc.mvpretrofitrequest.models.ProfileModel;
-import com.pyarinc.mvpretrofitrequest.services.PServices;
+import com.pyarinc.mvpretrofitrequest.services.Services;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private EditText mETName;
-    private PServices mService;
+    private Services mService;
     private TextView mTVResult;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mETName = (EditText) findViewById(R.id.main_name_et);
         mTVResult = (TextView) findViewById(R.id.main_reslut_tv);
-            mService = new PServices(this);
+            mService = new Services(this);
 
 
     }
@@ -34,20 +34,19 @@ public class MainActivity extends AppCompatActivity {
             Map<String,String> mProfileParams  = new HashMap<>();
             mProfileParams.put("q",mEnteredName);
             mService.mGetPResponse("profile_details","search/users",mProfileParams,
-                    new ResponseListener() {
+                   ProfileModel.class, new ResponseObjectListener() {
                         @Override
-                        public void onSuccessResp(ProfileModel body) {
-                            if(body !=null)
-                                mTVResult.setText(body.getItems().get(0).getLogin()+"\n Score: "+body.getItems().get(0).getScore());
+                        public void onSuccessResp(Object mObjectModel) {
+                            if(mObjectModel !=null) {
+                                ProfileModel mProfielModel = (ProfileModel) mObjectModel;
+                                mTVResult.setText(mProfielModel.getItems().get(0).getLogin()
+                                        +"  "+mProfielModel.getItems().get(0).getScore());
+                            }
                             else
                                 mTVResult.setText("Not found");
 
                         }
 
-                        @Override
-                        public void onFailureResp(String mErrorMsg) {
-                            mTVResult.setText(mErrorMsg);
-                        }
                     });
         }
     }
